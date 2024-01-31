@@ -8,7 +8,7 @@ alias wp "cd ~/workplace/"
 # emacs
 ##################################################
 
-alias emacs "/usr/local/opt/emacs/bin/emacs"
+alias emacs "/usr/bin/emacs"
 alias e "emacs -nw"
 
 function clean \
@@ -45,14 +45,6 @@ end
 # disable default fish greeting
 set fish_greeting
 
-# fix MacOS directory history bug
-# see https://github.com/fish-shell/fish-shell/issues/2330
-# use `fish_key_reader` and type in `alt-left` and `alt-right`:
-# on MacOS, `alt-left` sends `\eb` which maps to `backward-word`
-bind \eb prevd-or-backward-word
-# on MacOS, `alt-right` sends `\ef` which maps to `forward-word`
-bind \ef nextd-or-forward-word
-
 ##################################################
 # git
 ##################################################
@@ -67,11 +59,12 @@ function wgitstatus \
   --description "Continuously runs `git status` in a repository"
 
   function _gitstatus
-    echo -s "Repo: " (set_color magenta) (basename (pwd)) (set_color normal);
+    # #af87ff is same as color 141 (lavender purple) used in fish prompt
+    echo -s "Repo: " (set_color af87ff) (basename (pwd)) (set_color normal);
     git status;
   end
 
-  watch _gitstatus;
+  custom-watch _gitstatus;
 end
 
 ##################################################
@@ -105,8 +98,8 @@ alias tmuxconf "e ~/.tmux.conf && tmux source ~/.tmux.conf"
 
 ################################################## Custom Functions
 
-function watch \
-  --description "Polyfill watch CLI that's missing on MacOS"
+function custom-watch \
+  --description "Re-implement watch CLI to work better with fish"
 
   argparse 'i/interval=?!_validate_int --min 1' -- $argv;
   set -l interval 1;
@@ -118,7 +111,7 @@ function watch \
     set -l message (echo -s "Every " $interval "s: " (set_color brcyan) $argv (set_color normal));
     set -l date (date "+%a %b %d %X");
     set -l columns (tput cols);
-    
+
     clear;
     # a bit of a hack to right justify the date
     # 1. print date first padded with spaces until string is number of columns long
@@ -133,61 +126,7 @@ end
 
 ################################################## Applications
 
-##################################################
-# chrome
-##################################################
 
-function chrome \
-  --description "Opens URL in Google Chrome" \
-  --argument-names url
-
-  if test -z $url
-    open -na "Google Chrome";
-  else if string match --regex --quiet "https?://" "$url"
-    open -na "Google Chrome" "$url";
-  else
-    open -na "Google Chrome" "https://$url";
-  end
-end
-
-function chromei \
-  --description "Opens URL in Google Chrome in incognito mode" \
-  --argument-names url
-
-  if test -z $url
-    open -na "Google Chrome";
-  else if string match --regex --quiet "https?://" "$url"
-    open -na "Google Chrome" --args --incognito "$url";
-  else
-    open -na "Google Chrome" --args --incognito "https://$url";
-  end
-end
-
-function google \
-  --description "Searches query on Google using Google Chrome" \
-  --argument-names query
-
-  if test (count $argv) -gt 1
-    chrome "google.com/search?q=$argv";
-  else if test -z $query
-    chrome google.com;
-  else
-    chrome "google.com/search?q=$query";
-  end
-end
-
-function googlei \
-  --description "Searches query on Google using Google Chrome in incognito mode" \
-  --argument-names query
-
-  if test (count $argv) -gt 1
-    chromei "google.com/search?q=$argv";
-  else if test -z $query
-    chromei google.com;
-  else
-    chromei "google.com/search?q=$query";
-  end
-end
 
 ################################################## Misc
 
