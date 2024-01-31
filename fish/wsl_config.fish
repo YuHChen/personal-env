@@ -1,6 +1,7 @@
 # -*- conf-space -*- tell emacs to use conf-space-mode for this file
 
 alias wp "cd ~/workplace/"
+alias unity "cd /mnt/d/Program\ Files/Unity/Projects/"
 
 ################################################## Command Line Utilities
 
