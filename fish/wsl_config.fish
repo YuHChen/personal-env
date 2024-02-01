@@ -62,10 +62,10 @@ function wgitstatus \
   function _gitstatus
     # #af87ff is same as color 141 (lavender purple) used in fish prompt
     echo -s "Repo: " (set_color af87ff) (basename (pwd)) (set_color normal);
-    git status;
+    git -c color.ui=always status;
   end
 
-  custom-watch _gitstatus;
+  custom-watch _gitstatus $argv;
 end
 
 ##################################################
@@ -112,6 +112,13 @@ function custom-watch \
     set -l message (echo -s "Every " $interval "s: " (set_color brcyan) $argv (set_color normal));
     set -l date (date "+%a %b %d %X");
     set -l columns (tput cols);
+    # when executing in WSL, if the watched command accesses the Windows filesystem, it may execute slowly.
+    # this makes watch functionality unusable (especially for short intervals). the screen is cleared and
+    # then there is a noticeable lag before the command output is shown on screen.
+    # see https://learn.microsoft.com/en-us/windows/wsl/filesystems#file-storage-and-performance-across-file-systems
+    #
+    # to work around this, execute and save the watched command, clear the screen, and then print
+    set -l command_output ($argv);
 
     clear;
     # a bit of a hack to right justify the date
@@ -120,7 +127,8 @@ function custom-watch \
     # 3. finally print the message
     printf "%"$columns"s\r%s\n" $date $message;
     echo;
-    $argv;
+    # the command output will be stored as a list of every line, so join them back
+    string join \n $command_output;
     sleep $interval;
   end
 end
